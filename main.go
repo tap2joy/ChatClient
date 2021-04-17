@@ -39,6 +39,7 @@ func main() {
 
 	go ReceiveHandle(conn)
 
+	// 循环接收控制台输入
 	for {
 		if IsLogin {
 			if !IsStartGetChatLog {
@@ -287,7 +288,6 @@ func HandleServerPacket(conn net.Conn, dataBytes []byte) {
 		msg := &pb.SGetLog{}
 		err := proto.Unmarshal(dataBytes[8:length+8], msg)
 		if err != nil {
-			fmt.Printf("length = %d, len of dataBytes = %d\n", length, len(dataBytes))
 			fmt.Println("Unmarshal chat logs error:", err)
 		}
 
@@ -320,6 +320,15 @@ func HandleServerPacket(conn net.Conn, dataBytes []byte) {
 
 		HandleGetChannelListResp(conn, msg)
 		break
+	case pb_common.Mid_G2C_ERROR_MESSAGE:
+		msg := &pb_common.SErrorMessage{}
+		err := proto.Unmarshal(dataBytes[8:length+8], msg)
+		if err != nil {
+			fmt.Println("Unmarshal error message error:", err)
+		}
+
+		HandleErrorMessage(msg)
+		break
 	default:
 		fmt.Printf("unknown mid %d\n", mid)
 	}
@@ -349,6 +358,7 @@ func HandleLogoutResp(msg *pb.SLogout) {
 	fmt.Printf("**** 您已成功离开聊天室，再见 %s ****\n", msg.Name)
 	fmt.Println("-------------------------------------")
 	IsLogin = false
+	os.Exit(0)
 }
 
 // 处理聊天消息回复
@@ -359,7 +369,7 @@ func HandleSendResp(msg *pb.SSend) {
 
 	if msg.Result != "" {
 		timeStr := formatTime(time.Now().Unix())
-		fmt.Printf("system %s\n", timeStr)
+		fmt.Printf("系统消息 %s\n", timeStr)
 		fmt.Printf("    %s\n", msg.Result)
 	}
 }
@@ -439,6 +449,17 @@ func HandleGetChannelListResp(conn net.Conn, msg *pb.SGetChannelList) {
 
 	// 发送登陆消息
 	go SendLoginPacket(conn, NickName, uint32(channelId))
+}
+
+// 显示错误消息
+func HandleErrorMessage(msg *pb_common.SErrorMessage) {
+	if msg == nil {
+		return
+	}
+
+	timeStr := formatTime(time.Now().Unix())
+	fmt.Printf("系统消息 %s\n", timeStr)
+	fmt.Printf("    error code: %d, msg: %s \n", msg.Code, msg.Msg)
 }
 
 // 格式化消息时间
