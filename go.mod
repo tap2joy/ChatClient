@@ -3,6 +3,7 @@ module github.com/tap2joy/ChatClient
 go 1.14
 
 require (
+	github.com/spf13/viper v1.7.1
 	github.com/tap2joy/Protocols v0.0.0-00010101000000-000000000000
 	google.golang.org/protobuf v1.23.0
 )

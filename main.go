@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/tap2joy/ChatClient/utils"
 	pb_common "github.com/tap2joy/Protocols/go/common"
 	pb "github.com/tap2joy/Protocols/go/gateway"
 	"google.golang.org/protobuf/proto"
@@ -26,7 +27,7 @@ var (
 )
 
 func main() {
-	gateAddress := "127.0.0.1:9108"
+	gateAddress := utils.GetString("client", "gateway")
 	conn, err := net.Dial("tcp", gateAddress)
 	if err != nil {
 		fmt.Printf("connect fail..., err = %v", err)
