@@ -413,7 +413,9 @@ func HandleChangeChannel(msg *pb.SChangeChannel) {
 	fmt.Printf("当前聊天室id为 %d\n", CurrentChannel)
 	fmt.Println("-------------------------------------")
 
-	for _, v := range msg.Logs {
+	// 聊天记录倒序显示
+	for i := len(msg.Logs) - 1; i >= 0; i-- {
+		v := msg.Logs[i]
 		timeStr := formatTime(int64(v.Timestamp))
 		fmt.Printf("%s %s\n", v.SenderName, timeStr)
 		fmt.Printf("    %s\n", v.Content)
