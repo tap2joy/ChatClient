@@ -183,7 +183,7 @@ func SendPacket(conn net.Conn, mid pb_common.Mid, msgByte []byte) {
 	buf := &bytes.Buffer{}
 	var head []byte
 	head = make([]byte, 8)
-	binary.BigEndian.PutUint32(head[0:4], uint32(bytes.Count(msgByte, nil)-1))
+	binary.BigEndian.PutUint32(head[0:4], uint32(len(msgByte))) //uint32(bytes.Count(msgByte, nil)-1))
 	binary.BigEndian.PutUint32(head[4:8], uint32(mid))
 	buf.Write(head[:8])
 	buf.Write(msgByte)
@@ -194,13 +194,13 @@ func SendPacket(conn net.Conn, mid pb_common.Mid, msgByte []byte) {
 // 分包函数
 func packetSplitFunc(data []byte, atEOF bool) (advance int, token []byte, err error) {
 	if !atEOF && len(data) >= 8 {
-		var length int32
+		var length uint32
 		// 读出 数据包中 实际数据 的长度
 		binary.Read(bytes.NewReader(data[0:4]), binary.BigEndian, &length)
 		packetLen := int(length) + 8
 		dataLen := len(data)
-		//fmt.Printf("packetLen = %d, dataLen = %d\n", packetLen, dataLen)
-		if packetLen <= dataLen {
+		// fmt.Printf("packetLen = %d, dataLen = %d\n", packetLen, dataLen)
+		if packetLen >= 0 && packetLen <= dataLen {
 			return packetLen, data[:packetLen], nil
 		}
 	}
